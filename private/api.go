@@ -8,9 +8,9 @@
 package private
 
 import (
-	"github.com/dobyte/tencent-im/internal/conv"
-	"github.com/dobyte/tencent-im/internal/core"
-	"github.com/dobyte/tencent-im/internal/types"
+	"github.com/d60-Lab/tencent-im/internal/conv"
+	"github.com/d60-Lab/tencent-im/internal/core"
+	"github.com/d60-Lab/tencent-im/internal/types"
 )
 
 const (
@@ -22,6 +22,9 @@ const (
 	commandRevokeMessage       = "admin_msgwithdraw"
 	commandSetMessageRead      = "admin_set_msg_read"
 	commandGetUnreadMessageNum = "get_c2c_unread_msg_num"
+
+	// 新增接口命令（2022-2025年新增）
+	commandModifyC2CMsg = "modify_c2c_msg" // 修改历史单聊消息
 )
 
 type API interface {
@@ -105,6 +108,14 @@ type API interface {
 	// 点击查看详细文档:
 	// https://cloud.tencent.com/document/product/269/56043
 	GetUnreadMessageNum(userId string, peerUserIds ...string) (ret *GetUnreadMessageNumRet, err error)
+
+	// ========== 新增接口（2022-2025年） ==========
+
+	// ModifyC2CMsg 修改历史单聊消息
+	// App 管理员可以修改指定单聊会话的历史消息。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/74740
+	ModifyC2CMsg(fromUserId, toUserId, msgKey string, message *Message) (err error)
 }
 
 type api struct {
@@ -341,14 +352,39 @@ func (a *api) GetUnreadMessageNum(userId string, peerUserIds ...string) (ret *Ge
 	}
 
 	ret = &GetUnreadMessageNumRet{
-		Total:   resp.AllUnreadMsgNum,
-		Results: make(map[string]int, len(resp.PeerUnreadMsgNums)),
-		Errors:  resp.PeerErrors,
+		Total:         resp.AllUnreadMsgNum,
+		Conversations: make([]*Conversation, 0, len(resp.UnreadItems)),
 	}
 
-	for _, item := range resp.PeerUnreadMsgNums {
-		ret.Results[item.UserId] = item.UnreadMsgNum
+	for _, item := range resp.UnreadItems {
+		ret.Conversations = append(ret.Conversations, &Conversation{
+			PeerUserId:    item.ToUserId,
+			UnreadMsgNum:  item.UnreadMsgNum,
+			LastMsgTime:   item.LastMsgTime,
+			MsgKey:        item.MsgKey,
+			LastMsgSeq:    item.LastMsgSeq,
+			C2cLastMsgSeq: item.C2cLastMsgSeq,
+		})
 	}
 
+	return
+}
+
+// ========== 新增接口实现（2022-2025年） ==========
+
+// ModifyC2CMsg 修改历史单聊消息
+// App 管理员可以修改指定单聊会话的历史消息。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/74740
+func (a *api) ModifyC2CMsg(fromUserId, toUserId, msgKey string, message *Message) (err error) {
+	req := &modifyC2CMsgReq{
+		FromUserId: fromUserId,
+		ToUserId:   toUserId,
+		MsgKey:     msgKey,
+		MsgBody:    message.GetBody(),
+	}
+	resp := &types.ActionBaseResp{}
+
+	err = a.client.Post(service, commandModifyC2CMsg, req, resp)
 	return
 }

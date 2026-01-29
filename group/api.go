@@ -10,10 +10,10 @@ package group
 import (
 	"fmt"
 
-	"github.com/dobyte/tencent-im/internal/conv"
-	"github.com/dobyte/tencent-im/internal/core"
-	"github.com/dobyte/tencent-im/internal/enum"
-	"github.com/dobyte/tencent-im/internal/types"
+	"github.com/d60-Lab/tencent-im/internal/conv"
+	"github.com/d60-Lab/tencent-im/internal/core"
+	"github.com/d60-Lab/tencent-im/internal/enum"
+	"github.com/d60-Lab/tencent-im/internal/types"
 )
 
 const (
@@ -42,6 +42,21 @@ const (
 	commandDeleteGroupMsgBySender      = "delete_group_msg_by_sender"
 	commandGetGroupSimpleMsg           = "group_msg_get_simple"
 	commandGetOnlineMemberNum          = "get_online_member_num"
+
+	// 新增接口命令（2022-2025年新增）
+	commandGetGroupCounter    = "get_group_counter"    // 获取群计数器
+	commandUpdateGroupCounter = "update_group_counter" // 更新群计数器
+	commandDeleteGroupCounter = "delete_group_counter" // 删除群计数器
+	commandModifyGroupAttr    = "modify_group_attr"    // 修改群自定义属性
+	commandClearGroupAttr     = "clear_group_attr"     // 清空群自定义属性
+	commandSetGroupAttr       = "set_group_attr"       // 重置群自定义属性
+	commandDeleteGroupAttr    = "delete_group_attr"    // 删除群自定义属性
+	commandGetGroupBanMember  = "get_group_ban_member" // 获取群封禁成员列表
+	commandBanGroupMember     = "ban_group_member"     // 封禁群成员
+	commandUnbanGroupMember   = "unban_group_member"   // 解封群成员
+
+	serviceOpenIM         = "openim"
+	commandModifyGroupMsg = "modify_group_msg" // 修改历史群聊消息
 
 	batchGetGroupsLimit = 50 // 批量获取群组限制
 )
@@ -252,6 +267,74 @@ type API interface {
 	// 点击查看详细文档:
 	// https://cloud.tencent.com/document/product/269/49180
 	GetOnlineMemberNum(groupId string) (num int, err error)
+
+	// ========== 新增接口（2022-2025年） ==========
+
+	// GetGroupCounter 获取群计数器
+	// App 管理员可以根据群组 ID 获取群计数器的值。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/68897
+	GetGroupCounter(groupId string, counterKeys ...string) (counters map[string]int, err error)
+
+	// UpdateGroupCounter 更新群计数器
+	// App 管理员可以根据群组 ID 更新群计数器的值。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/68898
+	UpdateGroupCounter(groupId string, counters map[string]int) (err error)
+
+	// DeleteGroupCounter 删除群计数器
+	// App 管理员可以根据群组 ID 删除群计数器。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/68899
+	DeleteGroupCounter(groupId string, counterKeys ...string) (err error)
+
+	// ModifyGroupAttr 修改群自定义属性
+	// App 管理员可以修改指定群的自定义属性。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/67012
+	ModifyGroupAttr(groupId string, attrs map[string]interface{}) (err error)
+
+	// ClearGroupAttr 清空群自定义属性
+	// App 管理员可以清空指定群的所有自定义属性。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/67010
+	ClearGroupAttr(groupId string) (err error)
+
+	// GetGroupAttr 获取群自定义属性
+	// App 管理员可以获取指定群的自定义属性。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/67009
+	GetGroupAttr(groupId string, attrKeys ...string) (attrs map[string]interface{}, err error)
+
+	// DeleteGroupAttr 删除群自定义属性
+	// App 管理员可以删除指定群的指定自定义属性。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/67011
+	DeleteGroupAttr(groupId string, attrKeys ...string) (err error)
+
+	// BanGroupMember 封禁群成员
+	// App 管理员可以封禁指定群的指定成员。被封禁的成员不能发送消息。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/78860
+	BanGroupMember(groupId string, userIds []string, banSeconds int64) (err error)
+
+	// UnbanGroupMember 解封群成员
+	// App 管理员可以解封指定群的指定成员。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/78861
+	UnbanGroupMember(groupId string, userIds []string) (err error)
+
+	// GetGroupBanMember 获取群封禁成员列表
+	// App 管理员可以获取指定群的封禁成员列表。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/78862
+	GetGroupBanMember(groupId string) (userIds []string, err error)
+
+	// ModifyGroupMsg 修改历史群聊消息
+	// App 管理员可以修改指定群的历史消息。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/74741
+	ModifyGroupMsg(groupId string, msgSeq int, message *Message) (err error)
 }
 
 type api struct {
@@ -1311,5 +1394,213 @@ func (a *api) GetOnlineMemberNum(groupId string) (num int, err error) {
 
 	num = resp.OnlineMemberNum
 
+	return
+}
+
+// ========== 新增接口实现（2022-2025年） ==========
+
+// GetGroupCounter 获取群计数器
+// App 管理员可以根据群组 ID 获取群计数器的值。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/68897
+func (a *api) GetGroupCounter(groupId string, counterKeys ...string) (counters map[string]int, err error) {
+	req := &getGroupCounterReq{
+		GroupId:     groupId,
+		CounterKeys: counterKeys,
+	}
+	resp := &getGroupCounterResp{}
+
+	if err = a.client.Post(serviceGroup, commandGetGroupCounter, req, resp); err != nil {
+		return
+	}
+
+	counters = resp.Counters
+	return
+}
+
+// UpdateGroupCounter 更新群计数器
+// App 管理员可以根据群组 ID 更新群计数器的值。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/68898
+func (a *api) UpdateGroupCounter(groupId string, counters map[string]int) (err error) {
+	items := make([]counterItem, 0, len(counters))
+	for key, value := range counters {
+		items = append(items, counterItem{
+			Key:   key,
+			Value: value,
+		})
+	}
+
+	req := &updateGroupCounterReq{
+		GroupId:  groupId,
+		Counters: items,
+	}
+	resp := &types.ActionBaseResp{}
+
+	err = a.client.Post(serviceGroup, commandUpdateGroupCounter, req, resp)
+	return
+}
+
+// DeleteGroupCounter 删除群计数器
+// App 管理员可以根据群组 ID 删除群计数器。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/68899
+func (a *api) DeleteGroupCounter(groupId string, counterKeys ...string) (err error) {
+	req := &deleteGroupCounterReq{
+		GroupId:     groupId,
+		CounterKeys: counterKeys,
+	}
+	resp := &types.ActionBaseResp{}
+
+	err = a.client.Post(serviceGroup, commandDeleteGroupCounter, req, resp)
+	return
+}
+
+// ModifyGroupAttr 修改群自定义属性
+// App 管理员可以修改指定群的自定义属性。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/67012
+func (a *api) ModifyGroupAttr(groupId string, attrs map[string]interface{}) (err error) {
+	items := make([]attrItem, 0, len(attrs))
+	for key, value := range attrs {
+		items = append(items, attrItem{
+			Key:   key,
+			Value: value,
+		})
+	}
+
+	req := &modifyGroupAttrReq{
+		GroupId: groupId,
+		Attrs:   items,
+	}
+	resp := &types.ActionBaseResp{}
+
+	err = a.client.Post(serviceGroup, commandModifyGroupAttr, req, resp)
+	return
+}
+
+// ClearGroupAttr 清空群自定义属性
+// App 管理员可以清空指定群的所有自定义属性。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/67010
+func (a *api) ClearGroupAttr(groupId string) (err error) {
+	req := &clearGroupAttrReq{
+		GroupId: groupId,
+	}
+	resp := &types.ActionBaseResp{}
+
+	err = a.client.Post(serviceGroup, commandClearGroupAttr, req, resp)
+	return
+}
+
+// GetGroupAttr 获取群自定义属性
+// App 管理员可以获取指定群的自定义属性。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/67009
+func (a *api) GetGroupAttr(groupId string, attrKeys ...string) (attrs map[string]interface{}, err error) {
+	req := &getGroupAttrReq{
+		GroupId:  groupId,
+		AttrKeys: attrKeys,
+	}
+	resp := &getGroupAttrResp{}
+
+	if err = a.client.Post(serviceGroup, commandModifyGroupAttr, req, resp); err != nil {
+		return
+	}
+
+	attrs = make(map[string]interface{})
+	for _, item := range resp.Attrs {
+		attrs[item.Key] = item.Value
+	}
+	return
+}
+
+// DeleteGroupAttr 删除群自定义属性
+// App 管理员可以删除指定群的指定自定义属性。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/67011
+func (a *api) DeleteGroupAttr(groupId string, attrKeys ...string) (err error) {
+	req := &deleteGroupAttrReq{
+		GroupId:  groupId,
+		AttrKeys: attrKeys,
+	}
+	resp := &types.ActionBaseResp{}
+
+	err = a.client.Post(serviceGroup, commandDeleteGroupAttr, req, resp)
+	return
+}
+
+// BanGroupMember 封禁群成员
+// App 管理员可以封禁指定群的指定成员。被封禁的成员不能发送消息。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/78860
+func (a *api) BanGroupMember(groupId string, userIds []string, banSeconds int64) (err error) {
+	members := make([]banMemberItem, 0, len(userIds))
+	for _, userId := range userIds {
+		members = append(members, banMemberItem{
+			UserId:     userId,
+			BanSeconds: banSeconds,
+		})
+	}
+
+	req := &banGroupMemberReq{
+		GroupId: groupId,
+		Members: members,
+	}
+	resp := &types.ActionBaseResp{}
+
+	err = a.client.Post(serviceGroup, commandBanGroupMember, req, resp)
+	return
+}
+
+// UnbanGroupMember 解封群成员
+// App 管理员可以解封指定群的指定成员。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/78861
+func (a *api) UnbanGroupMember(groupId string, userIds []string) (err error) {
+	req := &unbanGroupMemberReq{
+		GroupId: groupId,
+		UserIds: userIds,
+	}
+	resp := &types.ActionBaseResp{}
+
+	err = a.client.Post(serviceGroup, commandUnbanGroupMember, req, resp)
+	return
+}
+
+// GetGroupBanMember 获取群封禁成员列表
+// App 管理员可以获取指定群的封禁成员列表。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/78862
+func (a *api) GetGroupBanMember(groupId string) (userIds []string, err error) {
+	req := &getGroupBanMemberReq{
+		GroupId: groupId,
+	}
+	resp := &getGroupBanMemberResp{}
+
+	if err = a.client.Post(serviceGroup, commandGetGroupBanMember, req, resp); err != nil {
+		return
+	}
+
+	userIds = make([]string, 0, len(resp.Members))
+	for _, member := range resp.Members {
+		userIds = append(userIds, member.UserId)
+	}
+	return
+}
+
+// ModifyGroupMsg 修改历史群聊消息
+// App 管理员可以修改指定群的历史消息。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/74741
+func (a *api) ModifyGroupMsg(groupId string, msgSeq int, message *Message) (err error) {
+	req := &modifyGroupMsgReq{
+		GroupId: groupId,
+		MsgSeq:  msgSeq,
+		Message: message.GetBody(),
+	}
+	resp := &types.ActionBaseResp{}
+
+	err = a.client.Post(serviceOpenIM, commandModifyGroupMsg, req, resp)
 	return
 }

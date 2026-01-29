@@ -2,7 +2,7 @@
  * @Author: fuxiao
  * @Email: 576101059@qq.com
  * @Date: 2021/8/27 12:54 下午
- * @Desc: TODO
+ * @Desc: 通用接口定义
  */
 
 package types

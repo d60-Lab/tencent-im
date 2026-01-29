@@ -7,7 +7,7 @@
 
 package private
 
-import "github.com/dobyte/tencent-im/internal/types"
+import "github.com/d60-Lab/tencent-im/internal/types"
 
 type (
 	// 发送消息（请求）
@@ -156,15 +156,9 @@ type (
 	// 查询单聊未读消息计数（响应）
 	getUnreadMessageNumResp struct {
 		types.ActionBaseResp
-		AllUnreadMsgNum   int                   `json:"AllC2CUnreadMsgNum"`  // 单聊消息总未读数
-		PeerUnreadMsgNums []unreadMessageNum    `json:"C2CUnreadMsgNumList"` // 单聊消息未读对端列表
-		PeerErrors        []*UnreadMessageError `json:"ErrorList"`           // 查询错误列表
-	}
-
-	// 未读消息数
-	unreadMessageNum struct {
-		UserId       string `json:"Peer_Account"`    // 单聊会话对端UserId
-		UnreadMsgNum int    `json:"C2CUnreadMsgNum"` // 该单聊会话的未读数
+		AllUnreadMsgNum int                   `json:"AllC2CUnreadMsgNum"`  // 单聊消息总未读数
+		UnreadItems     []unreadMessageNum    `json:"C2CUnreadMsgNumList"` // 单聊消息未读对端列表
+		PeerErrors      []*UnreadMessageError `json:"ErrorList"`           // 查询错误列表
 	}
 
 	// 查询错误项
@@ -175,9 +169,39 @@ type (
 
 	// GetUnreadMessageNumRet 未读消息结果
 	GetUnreadMessageNumRet struct {
-		Total   int                   // 单聊消息总未读数
-		Results map[string]int        // 未读消息数列表
-		Errors  []*UnreadMessageError // 错误消息列表
+		Total         int                   // 单聊消息总未读数
+		Conversations []*Conversation       // 会话列表
+		Errors        []*UnreadMessageError // 错误消息列表
+	}
+
+	// Conversation 会话信息
+	Conversation struct {
+		PeerUserId    string // 单聊会话对端UserId
+		UnreadMsgNum  int    // 该单聊会话的未读数
+		LastMsgTime   int64  // 最后一条消息的时间
+		MsgKey        string // 最后一条消息的MsgKey
+		LastMsgSeq    int    // 最后一条消息的序列号
+		C2cLastMsgSeq int    // 最后一条C2C消息的序列号
+	}
+
+	// ========== 新增类型定义（2022-2025年） ==========
+
+	// 修改历史单聊消息（请求）
+	modifyC2CMsgReq struct {
+		FromUserId string           `json:"From_Account"` // （必填）消息发送方UserID
+		ToUserId   string           `json:"To_Account"`   // （必填）消息接收方UserID
+		MsgKey     string           `json:"MsgKey"`       // （必填）消息唯一标识
+		MsgBody    []*types.MsgBody `json:"MsgBody"`      // （必填）消息内容
+	}
+
+	// 未读消息项
+	unreadMessageNum struct {
+		ToUserId      string `json:"Peer_Account"`    // 单聊会话对端UserId
+		UnreadMsgNum  int    `json:"C2CUnreadMsgNum"` // 该单聊会话的未读数
+		LastMsgTime   int64  `json:"LastMsgTime"`     // 最后一条消息的时间
+		MsgKey        string `json:"MsgKey"`          // 最后一条消息的MsgKey
+		LastMsgSeq    int    `json:"LastMsgSeq"`      // 最后一条消息的序列号
+		C2cLastMsgSeq int    `json:"C2cLastMsgSeq"`   // 最后一条C2C消息的序列号
 	}
 
 	ImageInfo          = types.ImageInfo

@@ -2,12 +2,12 @@
  * @Author: fuxiao
  * @Author: 576101059@qq.com
  * @Date: 2021/9/7 14:40
- * @Desc: TODO
+ * @Desc: 社交关系链管理相关枚举定义
  */
 
 package sns
 
-import "github.com/dobyte/tencent-im/internal/enum"
+import "github.com/d60-Lab/tencent-im/internal/enum"
 
 type (
 	// AddType 添加类型

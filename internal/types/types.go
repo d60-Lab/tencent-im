@@ -2,7 +2,7 @@
  * @Author: fuxiao
  * @Author: 576101059@qq.com
  * @Date: 2021/5/28 19:24
- * @Desc: TODO
+ * @Desc: 通用数据类型定义
  */
 
 package types

@@ -7,7 +7,7 @@
 
 package group
 
-import "github.com/dobyte/tencent-im/internal/types"
+import "github.com/d60-Lab/tencent-im/internal/types"
 
 type (
 	// 拉取App中的所有群组（请求）
@@ -504,5 +504,115 @@ type (
 	getOnlineMemberNumResp struct {
 		types.ActionBaseResp
 		OnlineMemberNum int `json:"OnlineMemberNum"` // 该群组的在线人数
+	}
+
+	// ========== 新增类型定义（2022-2025年） ==========
+
+	// 群计数器项
+	counterItem struct {
+		Key   string `json:"Key"`
+		Value int    `json:"Value"`
+	}
+
+	// 获取群计数器（请求）
+	getGroupCounterReq struct {
+		GroupId     string   `json:"GroupId"`               // （必填）群ID
+		CounterKeys []string `json:"CounterKeys,omitempty"` // （选填）计数器key列表，不填则获取所有
+	}
+
+	// 获取群计数器（响应）
+	getGroupCounterResp struct {
+		types.ActionBaseResp
+		Counters map[string]int `json:"Counters"` // 计数器列表
+	}
+
+	// 更新群计数器（请求）
+	updateGroupCounterReq struct {
+		GroupId  string        `json:"GroupId"`  // （必填）群ID
+		Counters []counterItem `json:"Counters"` // （必填）计数器列表
+	}
+
+	// 删除群计数器（请求）
+	deleteGroupCounterReq struct {
+		GroupId     string   `json:"GroupId"`     // （必填）群ID
+		CounterKeys []string `json:"CounterKeys"` // （必填）计数器key列表
+	}
+
+	// 群自定义属性项
+	attrItem struct {
+		Key   string      `json:"Key"`
+		Value interface{} `json:"Value"`
+	}
+
+	// 修改群自定义属性（请求）
+	modifyGroupAttrReq struct {
+		GroupId string     `json:"GroupId"` // （必填）群ID
+		Attrs   []attrItem `json:"Attrs"`   // （必填）属性列表
+	}
+
+	// 清空群自定义属性（请求）
+	clearGroupAttrReq struct {
+		GroupId string `json:"GroupId"` // （必填）群ID
+	}
+
+	// 获取群自定义属性（请求）
+	getGroupAttrReq struct {
+		GroupId  string   `json:"GroupId"`            // （必填）群ID
+		AttrKeys []string `json:"AttrKeys,omitempty"` // （选填）属性key列表，不填则获取所有
+	}
+
+	// 获取群自定义属性（响应）
+	getGroupAttrResp struct {
+		types.ActionBaseResp
+		Attrs []attrItem `json:"Attrs"` // 属性列表
+	}
+
+	// 删除群自定义属性（请求）
+	deleteGroupAttrReq struct {
+		GroupId  string   `json:"GroupId"`  // （必填）群ID
+		AttrKeys []string `json:"AttrKeys"` // （必填）属性key列表
+	}
+
+	// 封禁群成员项
+	banMemberItem struct {
+		UserId     string `json:"Member_Account"` // 群成员ID
+		BanSeconds int64  `json:"BanSeconds"`     // 封禁时长，单位秒
+	}
+
+	// 封禁群成员（请求）
+	banGroupMemberReq struct {
+		GroupId string          `json:"GroupId"` // （必填）群ID
+		Members []banMemberItem `json:"Members"` // （必填）封禁成员列表
+	}
+
+	// 解封群成员（请求）
+	unbanGroupMemberReq struct {
+		GroupId string   `json:"GroupId"`         // （必填）群ID
+		UserIds []string `json:"Members_Account"` // （必填）解封成员ID列表
+	}
+
+	// 获取群封禁成员列表（请求）
+	getGroupBanMemberReq struct {
+		GroupId string `json:"GroupId"` // （必填）群ID
+	}
+
+	// 封禁成员信息
+	banMemberInfo struct {
+		UserId        string `json:"Member_Account"` // 群成员ID
+		BannedUntil   int64  `json:"BannedUntil"`    // 封禁截止时间戳
+		BannedSeconds int64  `json:"BannedSeconds"`  // 封禁时长
+	}
+
+	// 获取群封禁成员列表（响应）
+	getGroupBanMemberResp struct {
+		types.ActionBaseResp
+		Members []banMemberInfo `json:"Members"` // 封禁成员列表
+	}
+
+	// 修改历史群聊消息（请求）
+	modifyGroupMsgReq struct {
+		GroupId string           `json:"GroupId"` // （必填）群ID
+		MsgSeq  int              `json:"MsgSeq"`  // （必填）消息seq
+		Message []*types.MsgBody `json:"MsgBody"` // （必填）消息体
 	}
 )

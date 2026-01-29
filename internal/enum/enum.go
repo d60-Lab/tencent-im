@@ -2,13 +2,13 @@
  * @Author: fuxiao
  * @Email: 576101059@qq.com
  * @Date: 2021/8/28 1:14 上午
- * @Desc: TODO
+ * @Desc: 内部枚举定义
  */
 
 package enum
 
 import (
-	"github.com/dobyte/tencent-im/internal/types"
+	"github.com/d60-Lab/tencent-im/internal/types"
 )
 
 const (

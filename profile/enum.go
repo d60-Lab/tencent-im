@@ -2,14 +2,14 @@
  * @Author: fuxiao
  * @Author: 576101059@qq.com
  * @Date: 2021/9/7 14:03
- * @Desc: TODO
+ * @Desc: 用户资料管理相关枚举定义
  */
 
 package profile
 
 import (
-	"github.com/dobyte/tencent-im/internal/enum"
-	"github.com/dobyte/tencent-im/internal/types"
+	"github.com/d60-Lab/tencent-im/internal/enum"
+	"github.com/d60-Lab/tencent-im/internal/types"
 )
 
 type (

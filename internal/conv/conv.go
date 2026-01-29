@@ -2,7 +2,7 @@
  * @Author: fuxiao
  * @Email: 576101059@qq.com
  * @Date: 2021/8/31 11:16 下午
- * @Desc: TODO
+ * @Desc: 类型转换工具
  */
 
 package conv
@@ -66,20 +66,20 @@ func String(any interface{}) string {
 		if v == nil {
 			return ""
 		}
-		
+
 		if i, ok := v.(stringInterface); ok {
 			return i.String()
 		}
-		
+
 		if i, ok := v.(errorInterface); ok {
 			return i.Error()
 		}
-		
+
 		var (
 			rv   = reflect.ValueOf(v)
 			kind = rv.Kind()
 		)
-		
+
 		switch kind {
 		case reflect.Chan,
 			reflect.Map,
@@ -94,11 +94,11 @@ func String(any interface{}) string {
 		case reflect.String:
 			return rv.String()
 		}
-		
+
 		if kind == reflect.Ptr {
 			return String(rv.Elem().Interface())
 		}
-		
+
 		if b, e := json.Marshal(v); e != nil {
 			return fmt.Sprint(v)
 		} else {

@@ -2,3 +2,38 @@
 */.DS_Store
 .vscode
 go.sum
+
+# 环境变量文件（包含敏感凭证）
+.env
+.env.local
+.env.*.local
+
+# 测试覆盖率报告
+coverage.out
+coverage.html
+*.coverprofile
+
+# 构建产物
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+vendor/
+
+# IDE 和编辑器
+*.swp
+*.swo
+*~
+.DS_Store
+.vscode/
+.idea/
+*.iml
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+*.log

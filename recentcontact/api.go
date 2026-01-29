@@ -2,20 +2,28 @@
  * @Author: wanglin
  * @Author: wanglin@vspn.com
  * @Date: 2021/10/28 16:05
- * @Desc: TODO
+ * @Desc: 最近联系人（会话）管理 API 实现
  */
 
 package recentcontact
 
 import (
-	"github.com/dobyte/tencent-im/internal/core"
-	"github.com/dobyte/tencent-im/internal/types"
+	"github.com/d60-Lab/tencent-im/internal/core"
+	"github.com/d60-Lab/tencent-im/internal/types"
 )
 
 const (
 	service              = "recentcontact"
 	commandFetchSessions = "get_list"
 	commandDeleteSession = "delete"
+
+	// 新增接口命令（2022年新增）
+	commandCreateContactGroup = "create_contact_group" // 创建会话分组数据
+	commandDelContactGroup    = "del_contact_group"    // 删除会话分组数据
+	commandUpdateContactGroup = "update_contact_group" // 更新会话分组数据
+	commandSearchContactGroup = "search_contact_group" // 搜索会话分组标记数据
+	commandMarkContact        = "mark_contact"         // 创建或更新会话标记数据
+	commandGetContactGroup    = "get_contact_group"    // 拉取会话分组标记数据
 )
 
 type API interface {
@@ -37,6 +45,44 @@ type API interface {
 	// 点击查看详细文档:
 	// https://cloud.tencent.com/document/product/269/62119
 	DeleteSession(fromUserId, toUserId string, SessionType SessionType, isClearRamble ...bool) (err error)
+
+	// ========== 新增接口（2022年） ==========
+
+	// CreateContactGroup 创建会话分组数据
+	// App 管理员可以创建会话分组。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/81914
+	CreateContactGroup(userId string, groupName string, contactIds []string) (err error)
+
+	// DeleteContactGroup 删除会话分组数据
+	// App 管理员可以删除会话分组。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/81915
+	DeleteContactGroup(userId string, groupNames []string) (err error)
+
+	// UpdateContactGroup 更新会话分组数据
+	// App 管理员可以更新会话分组。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/81916
+	UpdateContactGroup(userId string, groupName string, newName string, contactIds []string) (err error)
+
+	// SearchContactGroup 搜索会话分组标记数据
+	// App 管理员可以搜索会话分组标记数据。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/81917
+	SearchContactGroup(userId string, groupName string, markType int) (contacts []Contact, err error)
+
+	// MarkContact 创建或更新会话标记数据
+	// App 管理员可以创建或更新会话标记。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/81918
+	MarkContact(userId string, contactId string, markType int) (err error)
+
+	// GetContactGroup 拉取会话分组标记数据
+	// App 管理员可以拉取会话分组标记数据。
+	// 点击查看详细文档:
+	// https://cloud.tencent.com/document/product/269/81919
+	GetContactGroup(userId string) (groups []ContactGroup, err error)
 }
 
 type api struct {
@@ -144,5 +190,109 @@ func (a *api) DeleteSession(fromUserId, toUserId string, SessionType SessionType
 		return
 	}
 
+	return
+}
+
+// ========== 新增接口实现（2022年） ==========
+
+// CreateContactGroup 创建会话分组数据
+// App 管理员可以创建会话分组。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/81914
+func (a *api) CreateContactGroup(userId string, groupName string, contactIds []string) (err error) {
+	req := &createContactGroupReq{
+		UserId:     userId,
+		GroupName:  groupName,
+		ContactIds: contactIds,
+	}
+	resp := &types.ActionBaseResp{}
+
+	err = a.client.Post(service, commandCreateContactGroup, req, resp)
+	return
+}
+
+// DeleteContactGroup 删除会话分组数据
+// App 管理员可以删除会话分组。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/81915
+func (a *api) DeleteContactGroup(userId string, groupNames []string) (err error) {
+	req := &deleteContactGroupReq{
+		UserId:     userId,
+		GroupNames: groupNames,
+	}
+	resp := &types.ActionBaseResp{}
+
+	err = a.client.Post(service, commandDelContactGroup, req, resp)
+	return
+}
+
+// UpdateContactGroup 更新会话分组数据
+// App 管理员可以更新会话分组。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/81916
+func (a *api) UpdateContactGroup(userId string, groupName string, newName string, contactIds []string) (err error) {
+	req := &updateContactGroupReq{
+		UserId:     userId,
+		GroupName:  groupName,
+		NewName:    newName,
+		ContactIds: contactIds,
+	}
+	resp := &types.ActionBaseResp{}
+
+	err = a.client.Post(service, commandUpdateContactGroup, req, resp)
+	return
+}
+
+// SearchContactGroup 搜索会话分组标记数据
+// App 管理员可以搜索会话分组标记数据。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/81917
+func (a *api) SearchContactGroup(userId string, groupName string, markType int) (contacts []Contact, err error) {
+	req := &searchContactGroupReq{
+		UserId:    userId,
+		GroupName: groupName,
+		MarkType:  markType,
+	}
+	resp := &searchContactGroupResp{}
+
+	if err = a.client.Post(service, commandSearchContactGroup, req, resp); err != nil {
+		return
+	}
+
+	contacts = resp.Contacts
+	return
+}
+
+// MarkContact 创建或更新会话标记数据
+// App 管理员可以创建或更新会话标记。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/81918
+func (a *api) MarkContact(userId string, contactId string, markType int) (err error) {
+	req := &markContactReq{
+		UserId:    userId,
+		ContactId: contactId,
+		MarkType:  markType,
+	}
+	resp := &types.ActionBaseResp{}
+
+	err = a.client.Post(service, commandMarkContact, req, resp)
+	return
+}
+
+// GetContactGroup 拉取会话分组标记数据
+// App 管理员可以拉取会话分组标记数据。
+// 点击查看详细文档:
+// https://cloud.tencent.com/document/product/269/81919
+func (a *api) GetContactGroup(userId string) (groups []ContactGroup, err error) {
+	req := &getContactGroupReq{
+		UserId: userId,
+	}
+	resp := &getContactGroupResp{}
+
+	if err = a.client.Post(service, commandGetContactGroup, req, resp); err != nil {
+		return
+	}
+
+	groups = resp.Groups
 	return
 }

@@ -10,19 +10,20 @@ package im_test
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"strconv"
 	"testing"
 	"time"
 
-	"github.com/dobyte/tencent-im"
-	"github.com/dobyte/tencent-im/account"
-	"github.com/dobyte/tencent-im/group"
-	"github.com/dobyte/tencent-im/operation"
-	"github.com/dobyte/tencent-im/private"
-	"github.com/dobyte/tencent-im/profile"
-	"github.com/dobyte/tencent-im/push"
-	"github.com/dobyte/tencent-im/recentcontact"
-	"github.com/dobyte/tencent-im/sns"
+	im "github.com/d60-Lab/tencent-im"
+	"github.com/d60-Lab/tencent-im/account"
+	"github.com/d60-Lab/tencent-im/group"
+	"github.com/d60-Lab/tencent-im/operation"
+	"github.com/d60-Lab/tencent-im/private"
+	"github.com/d60-Lab/tencent-im/profile"
+	"github.com/d60-Lab/tencent-im/push"
+	"github.com/d60-Lab/tencent-im/recentcontact"
+	"github.com/d60-Lab/tencent-im/sns"
 )
 
 const (
@@ -40,12 +41,37 @@ const (
 )
 
 func NewIM() im.IM {
+	// 从环境变量读取配置
+	appId := getEnvAsInt("TIM_APP_ID", 0)
+	appSecret := getEnv("TIM_APP_SECRET", "")
+	userId := getEnv("TIM_USER_ID", "administrator")
+	baseUrl := getEnv("TIM_BASE_URL", "https://console.tim.qq.com")
+
 	return im.NewIM(&im.Options{
-		AppId:      1400564830,
-		AppSecret:  "0d2a321b087fdb8fd5ed5ea14fe0489139086eb1b03541774fc9feeab8f2bfd3",
-		UserId:     "administrator",
+		AppId:      appId,
+		AppSecret:  appSecret,
+		UserId:     userId,
 		Expiration: 3600,
+		BaseUrl:    baseUrl,
 	})
+}
+
+// getEnv 获取环境变量，如果不存在则返回默认值
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
+
+// getEnvAsInt 获取环境变量并转换为 int，如果不存在或转换失败则返回默认值
+func getEnvAsInt(key string, defaultValue int) int {
+	if value := os.Getenv(key); value != "" {
+		if intValue, err := strconv.Atoi(value); err == nil {
+			return intValue
+		}
+	}
+	return defaultValue
 }
 
 // 处理错误
@@ -375,9 +401,11 @@ func TestIm_Operation_GetOperationData(t *testing.T) {
 		handleError(t, "operation.GetOperationData", err)
 	}
 
-	t.Log(data[0].AppId)
-	t.Log(data[0].AppName)
-	t.Log(data[0].ActiveUserNum)
+	if len(data) > 0 {
+		t.Log(data[0].AppId)
+		t.Log(data[0].AppName)
+		t.Log(data[0].ActiveUserNum)
+	}
 	t.Log("Success")
 }
 
@@ -1002,7 +1030,7 @@ func TestIm_Private_GetUnreadMessageNum(t *testing.T) {
 	}
 
 	t.Log(ret.Total)
-	t.Log(ret.Results)
+	t.Log(ret.Conversations)
 	t.Log(ret.Errors)
 }
 

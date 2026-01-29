@@ -2,7 +2,7 @@
  * @Author: fuxiao
  * @Author: 576101059@qq.com
  * @Date: 2021/9/7 11:09
- * @Desc: TODO
+ * @Desc: 账号管理相关枚举定义
  */
 
 package account

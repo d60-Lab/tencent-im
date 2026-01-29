@@ -11,18 +11,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dobyte/tencent-im/account"
-	"github.com/dobyte/tencent-im/callback"
-	"github.com/dobyte/tencent-im/group"
-	"github.com/dobyte/tencent-im/internal/core"
-	"github.com/dobyte/tencent-im/internal/sign"
-	"github.com/dobyte/tencent-im/mute"
-	"github.com/dobyte/tencent-im/operation"
-	"github.com/dobyte/tencent-im/private"
-	"github.com/dobyte/tencent-im/profile"
-	"github.com/dobyte/tencent-im/push"
-	"github.com/dobyte/tencent-im/recentcontact"
-	"github.com/dobyte/tencent-im/sns"
+	"github.com/d60-Lab/tencent-im/account"
+	"github.com/d60-Lab/tencent-im/callback"
+	"github.com/d60-Lab/tencent-im/group"
+	"github.com/d60-Lab/tencent-im/internal/core"
+	"github.com/d60-Lab/tencent-im/internal/sign"
+	"github.com/d60-Lab/tencent-im/mute"
+	"github.com/d60-Lab/tencent-im/operation"
+	"github.com/d60-Lab/tencent-im/private"
+	"github.com/d60-Lab/tencent-im/profile"
+	"github.com/d60-Lab/tencent-im/push"
+	"github.com/d60-Lab/tencent-im/recentcontact"
+	"github.com/d60-Lab/tencent-im/sns"
 )
 
 type Error = core.Error
@@ -54,10 +54,15 @@ type (
 	}
 
 	Options struct {
-		AppId      int    // 应用SDKAppID，可在即时通信 IM 控制台 的应用卡片中获取。
-		AppSecret  string // 密钥信息，可在即时通信 IM 控制台 的应用详情页面中获取，具体操作请参见 获取密钥
-		UserId     string // 用户ID
-		Expiration int    // UserSig过期时间
+		AppId      int           // 应用SDKAppID，可在即时通信 IM 控制台 的应用卡片中获取。
+		AppSecret  string        // 密钥信息，可在即时通信 IM 控制台 的应用详情页面中获取，具体操作请参见 获取密钥
+		UserId     string        // 用户ID
+		Expiration int           // UserSig过期时间（秒）
+		BaseUrl    string        // 可选：自定义 API 基础 URL
+		BackupUrl  string        // 可选：备用 URL
+		Timeout    time.Duration // 可选：请求超时时间，默认 30 秒
+		Logger     core.Logger   // 可选：自定义日志实现，默认使用标准输出
+		Debug      bool          // 可选：是否开启调试模式
 	}
 
 	UserSig struct {
@@ -117,6 +122,11 @@ func NewIM(opt *Options) IM {
 		AppSecret:  opt.AppSecret,
 		UserId:     opt.UserId,
 		Expiration: opt.Expiration,
+		BaseUrl:    opt.BaseUrl,
+		BackupUrl:  opt.BackupUrl,
+		Timeout:    opt.Timeout,
+		Logger:     opt.Logger,
+		Debug:      opt.Debug,
 	})}
 }
 

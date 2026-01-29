@@ -1,3 +1,13 @@
+# 腾讯云 IM SDK for Go
+
+[![CI](https://github.com/d60-Lab/tencent-im/actions/workflows/ci.yml/badge.svg)](https://github.com/d60-Lab/tencent-im/actions/workflows/ci.yml)
+[![Lint](https://github.com/d60-Lab/tencent-im/actions/workflows/lint.yml/badge.svg)](https://github.com/d60-Lab/tencent-im/actions/workflows/lint.yml)
+[![Security](https://github.com/d60-Lab/tencent-im/actions/workflows/security.yml/badge.svg)](https://github.com/d60-Lab/tencent-im/actions/workflows/security.yml)
+[![CodeQL](https://github.com/d60-Lab/tencent-im/actions/workflows/codeql.yml/badge.svg)](https://github.com/d60-Lab/tencent-im/actions/workflows/codeql.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/d60-Lab/tencent-im)](https://goreportcard.com/report/github.com/d60-Lab/tencent-im)
+[![Go Reference](https://pkg.go.dev/badge/github.com/d60-Lab/tencent-im.svg)](https://pkg.go.dev/github.com/d60-Lab/tencent-im)
+[![License](https://img.shields.io/github/license/d60-Lab/tencent-im)](https://github.com/d60-Lab/tencent-im/blob/master/LICENSE)
+
 ## 腾讯云IM官方API文档
 
 点击查看 [官方文档](https://cloud.tencent.com/product/im/developer)
@@ -5,10 +15,75 @@
 ## 如何使用
 
 ```shell script
-go get github.com/dobyte/tencent-im
+go get github.com/d60-Lab/tencent-im
+```
+
+## 运行测试
+
+⚠️ **安全提示**：测试需要有效的腾讯云 IM 凭证。**切勿**将凭证硬编码到代码中！
+
+### 配置测试凭证
+
+```bash
+# 方式 1: 使用 .env 文件（推荐）
+cp .env.example .env
+# 编辑 .env 文件，填入您的实际凭证
+
+# 方式 2: 直接设置环境变量
+export TIM_APP_ID=1400000000
+export TIM_APP_SECRET=your_app_secret_here
+
+# 方式 3: 在命令行临时设置
+TIM_APP_ID=1400000000 TIM_APP_SECRET=your_secret go test ./...
+```
+
+### 运行测试
+
+```bash
+# 运行所有测试
+go test ./...
+
+# 跳过集成测试
+go test -short ./...
+
+# 查看详细输出
+go test -v ./...
+```
+
+更多测试相关信息，请查看 [TESTING.md](TESTING.md)。
+
+## 开发指南
+
+### 代码提交前检查
+
+本项目配置了 pre-commit hooks，在代码提交前自动执行质量检查。首次克隆仓库后，运行以下命令安装：
+
+```bash
+./scripts/install-hooks.sh
+```
+
+Pre-commit hook 会自动执行以下检查：
+- **代码格式化**: 检查 `gofmt` 格式
+- **导入排序**: 检查 `goimports` 格式
+- **静态分析**: 运行 `go vet`
+- **依赖管理**: 验证 `go.mod` 和 `go.sum`
+- **编译测试**: 确保代码可以编译
+- **单元测试**: 运行测试（可通过 `SKIP_TESTS=1` 跳过）
+- **代码检查**: 如果安装了 `golangci-lint` 则运行
+
+跳过检查提交：
+```bash
+git commit --no-verify
+```
+
+跳过测试但保留其他检查：
+```bash
+SKIP_TESTS=1 git commit
 ```
 
 ## 调用方法
+
+### 基础用法（使用默认中国区域名）
 
 ```go
 package main
@@ -16,8 +91,8 @@ package main
 import (
     "fmt"
     
-    "github.com/dobyte/tencent-im"
-    "github.com/dobyte/tencent-im/account"
+    "github.com/d60-Lab/tencent-im"
+    "github.com/d60-Lab/tencent-im/account"
 )
 
 func main() {
@@ -41,6 +116,72 @@ func main() {
     }
     
     fmt.Println("import account success.")
+}
+```
+
+### 自定义API域名（支持不同地区）
+
+腾讯云IM在不同地区有不同的API域名，您可以根据应用创建的地区选择对应的域名：
+
+```go
+package main
+
+import (
+    "github.com/d60-Lab/tencent-im"
+)
+
+func main() {
+    // 方式1：仅配置主域名（推荐）
+    tim := im.NewIM(&im.Options{
+        AppId:     1400579830,
+        AppSecret: "your_app_secret",
+        UserId:    "administrator",
+        BaseUrl:   "https://console.tim.qq.com", // 自定义主域名
+    })
+    
+    // 方式2：同时配置主域名和备用域名
+    tim := im.NewIM(&im.Options{
+        AppId:     1400579830,
+        AppSecret: "your_app_secret",
+        UserId:    "administrator",
+        BaseUrl:   "https://adminapisgp.im.qcloud.com",    // 新加坡主域名
+        BackupUrl: "https://adminapi.my-imcloud.com",       // 备用域名
+    })
+}
+```
+
+**不同地区的API域名：**
+
+| 地区 | API域名 |
+|------|---------|
+| 中国 | https://console.tim.qq.com |
+| 新加坡 | https://adminapisgp.im.qcloud.com |
+| 韩国 | https://adminapikr.im.qcloud.com |
+| 德国 | https://adminapiger.im.qcloud.com |
+| 印度 | https://adminapiind.im.qcloud.com |
+
+**注意**：请根据您的SDK AppID创建时选择的地区，使用对应的API域名。如果不确定，请在腾讯云IM控制台查看应用信息。
+
+### 使用回调功能
+
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+    "net/http"
+    
+    "github.com/d60-Lab/tencent-im"
+    "github.com/d60-Lab/tencent-im/callback"
+)
+
+func main() {
+    tim := im.NewIM(&im.Options{
+        AppId:     1400579830,
+        AppSecret: "your_app_secret",
+        UserId:    "administrator",
+    })
     	
     // 注册回调事件
     tim.Callback().Register(callback.EventAfterFriendAdd, func(ack callback.Ack, data interface{}) {

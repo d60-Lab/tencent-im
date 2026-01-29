@@ -1,5 +1,3 @@
-module github.com/dobyte/tencent-im
+module github.com/d60-Lab/tencent-im
 
-go 1.16
-
-require github.com/dobyte/http v0.0.2
+go 1.21

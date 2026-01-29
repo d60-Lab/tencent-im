@@ -2,10 +2,12 @@
  * @Author: fuxiao
  * @Email: 576101059@qq.com
  * @Date: 2021/8/27 1:12 下午
- * @Desc: TODO
+ * @Desc: 错误处理实现
  */
 
 package core
+
+import "fmt"
 
 type Error interface {
 	error
@@ -26,7 +28,7 @@ func NewError(code int, message string) Error {
 }
 
 func (e *respError) Error() string {
-	return e.message
+	return fmt.Sprintf("code: %d, message: %s", e.code, e.message)
 }
 
 func (e *respError) Code() int {

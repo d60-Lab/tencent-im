@@ -2,7 +2,7 @@
  * @Author: fuxiao
  * @Author: 576101059@qq.com
  * @Date: 2021/9/7 17:11
- * @Desc: TODO
+ * @Desc: 群组实体类
  */
 
 package group
@@ -10,8 +10,8 @@ package group
 import (
 	"time"
 
-	"github.com/dobyte/tencent-im/internal/core"
-	"github.com/dobyte/tencent-im/internal/enum"
+	"github.com/d60-Lab/tencent-im/internal/core"
+	"github.com/d60-Lab/tencent-im/internal/enum"
 )
 
 var (

@@ -2,7 +2,7 @@
  * @Author: wanglin
  * @Author: wanglin@vspn.com
  * @Date: 2021/11/3 10:45
- * @Desc: TODO
+ * @Desc: 错误码常量定义
  */
 
 package enum

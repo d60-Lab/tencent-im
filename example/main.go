@@ -2,7 +2,7 @@
  * @Author: fuxiao
  * @Author: 576101059@qq.com
  * @Date: 2021/8/31 15:14
- * @Desc: TODO
+ * @Desc: SDK 使用示例 - 演示账号导入和回调事件处理
  */
 
 package main
@@ -12,9 +12,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dobyte/tencent-im"
-	"github.com/dobyte/tencent-im/account"
-	"github.com/dobyte/tencent-im/callback"
+	im "github.com/d60-Lab/tencent-im"
+	"github.com/d60-Lab/tencent-im/account"
+	"github.com/d60-Lab/tencent-im/callback"
 )
 
 func main() {

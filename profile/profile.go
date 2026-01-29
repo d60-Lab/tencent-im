@@ -2,15 +2,15 @@
  * @Author: fuxiao
  * @Email: 576101059@qq.com
  * @Date: 2021/8/28 11:23 上午
- * @Desc: TODO
+ * @Desc: 用户资料实体类
  */
 
 package profile
 
 import (
-	"github.com/dobyte/tencent-im/internal/core"
-	"github.com/dobyte/tencent-im/internal/entity"
-	"github.com/dobyte/tencent-im/internal/enum"
+	"github.com/d60-Lab/tencent-im/internal/core"
+	"github.com/d60-Lab/tencent-im/internal/entity"
+	"github.com/d60-Lab/tencent-im/internal/enum"
 )
 
 type Profile struct {

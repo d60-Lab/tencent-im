@@ -4,6 +4,10 @@
 
 <a name="v0.2.0"></a>
 ## v0.2.0 - 2026-01-29
+### Bug Fixes
+
+* correct git-chglog configuration format
+
 ### Code Refactoring
 
 * major project restructuring and improvements
